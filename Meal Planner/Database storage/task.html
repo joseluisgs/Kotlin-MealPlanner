@@ -1,0 +1,126 @@
+<h5>Description</h5>
+
+<p>At this point, when we close our program, we lose all our stored meals! Let's improve our planner and connect a database to retrieve all meals after a restart.</p>
+
+<p>To connect a database to our project, we can use <strong>Java DataBase Connectivity </strong>(JDBC), an API for database-independent connectivity between programs and various databases. This standard ensures the same methods for connecting, updating, querying, and results handling, regardless of the database you employ. However, the choice of the database affects the SQL syntax, available data types, and supported features.</p>
+
+<p>In this project, we will refer to <strong>SQLite</strong>. It is a very popular and straightforward solution that contains great capabilities. Android, for example, comes with SQLite by default. An SQLite is a single-file database. Although, there may be some differences between different SQL databases. You can find more information on the SQLite datatypes and syntax on the official SQLite website: <a target="_blank" href="https://www.sqlite.org/datatype3.html" rel="noopener noreferrer nofollow">Datatypes In SQLite Version 3</a> and <a target="_blank" href="https://www.sqlite.org/lang.html" rel="noopener noreferrer nofollow">SQL As Understood By SQLite</a>.</p>
+
+<p>In this stage, we're going to store meal data in database tables. When the program restarts, the saved data should be available in the program.</p>
+
+<p>To use SQLite in Kotlin, you need to import the <code class="language-kotlin">sqlite-jdbc</code> library into your project. For the Meal Planner, this is already done. You can find an example of this library in the <a target="_blank" href="https://github.com/xerial/sqlite-jdbc#usage" rel="noopener noreferrer nofollow">sqlite-jdbc</a> repository (Github). The same code is applicable in Kotlin, although, with reduced functionality; namely, without the try-catch-finally expressions:</p>
+
+<pre><code class="language-kotlin">import java.sql.DriverManager
+
+fun main() {
+    // Connect to an sqlite database saved in sample.db
+    // or create it if it doesn't exist
+    val connection = DriverManager.getConnection("jdbc:sqlite:sample.db")
+    // Create a Statement instance
+    val statement = connection.createStatement()
+    // Execute the update SQL commands
+    statement.executeUpdate("drop table if exists person")
+    statement.executeUpdate("create table person (id integer, name string)")
+    statement.executeUpdate("insert into person values(1, 'leo')")
+    statement.executeUpdate("insert into person values(2, 'yui')")
+    // Execute the Query
+    val rs = statement.executeQuery("select * from person")
+    // Read the result set
+    while (rs.next()) {
+        println("name = " + rs.getString("name"))
+        println("id = " + rs.getInt("id"))
+    }
+    statement.close()
+    connection.close()
+}</code></pre>
+
+<p>Mind that the nested<strong> </strong><code class="language-kotlin">resultset</code> requires different <code class="language-kotlin">statement</code> instances.</p>
+
+<p>The <code class="language-kotlin">jdbc:sqlite:sample.db</code> string includes three strings divided by semicolons. The first one is the database interface, the second is the database, and the third is the path and the name of your database.</p>
+
+<p>It's a good idea to use <a target="_blank" href="https://sqlitebrowser.org/" rel="noopener noreferrer nofollow">DB Browser for SQLite</a> — a nice open-source GUI tool for browsing SQLite database files. You can inspect the tables you've created and the data in your database. Moreover, you can try out SQL commands there.</p>
+
+<p><div class="alert alert-warning">If you are connected to the database file when you <strong>check</strong> your code, it may lead to issues.</div></p>
+
+<h5>Objectives</h5>
+
+<ol>
+    <li>Your program should create and sequentially connect to a database file named <code class="language-kotlin">meals.db</code>. When you start your program, this file will be created inside the project root path. In our tests, it is different;</li>
+    <li>Create two tables. Name the first one as <code class="language-kotlin">meals</code> with three columns: <code class="language-kotlin">category</code> (text), <code class="language-kotlin">meal</code> (text), and <code class="language-kotlin">meal_id</code> (integer). Name the second table <code class="language-kotlin">ingredients</code>; it must contain three columns: <code class="language-kotlin">ingredient</code> (text), <code class="language-kotlin">ingredient_id</code> (integer), and <code class="language-kotlin">meal_id</code> (integer). <code class="language-kotlin">Meal_id</code> in both tables must match!</li>
+    <li>Read all data in the tables, so their contents are available before a <code class="language-kotlin">show</code> operation is requested;</li>
+    <li>When users <code class="language-kotlin">add</code> a new meal, store it in your database.</li>
+</ol>
+
+<p>There are no changes in the input/output structure in this stage.</p>
+
+<h5>Example</h5>
+
+<p>The greater-than symbol followed by a space (<code class="language-kotlin">&gt; </code>) represents the user input. Note that it's not part of the input.</p>
+
+<p><strong>Example 1:</strong><em> standard execution and a restart</em></p>
+
+<pre><code class="language-no-highlight">What would you like to do (add, show, exit)?
+&gt; add
+Which meal do you want to add (breakfast, lunch, dinner)?
+&gt; lunch
+Input the meal's name:
+&gt; salad
+Input the ingredients:
+&gt; lettuce, tomato, onion, cheese, olives
+The meal has been added!
+What would you like to do (add, show, exit)?
+&gt; add
+Which meal do you want to add (breakfast, lunch, dinner)?
+&gt; breakfast
+Input the meal's name:
+&gt; oatmeal
+Input the ingredients:
+&gt; oats, milk, banana, peanut butter
+The meal has been added!
+What would you like to do (add, show, exit)?
+&gt; show
+
+Category: lunch
+Name: salad
+Ingredients:
+lettuce
+tomato
+onion
+cheese
+olives
+
+Category: breakfast
+Name: oatmeal
+Ingredients:
+oats
+milk
+banana
+peanut butter
+
+What would you like to do (add, show, exit)?
+&gt; exit
+Bye!
+
+What would you like to do (add, show, exit)?
+&gt; show
+
+Category: lunch
+Name: salad
+Ingredients:
+lettuce
+tomato
+onion
+cheese
+olives
+
+Category: breakfast
+Name: oatmeal
+Ingredients:
+oats
+milk
+banana
+peanut butter
+
+What would you like to do (add, show, exit)?
+&gt; exit
+Bye!</code></pre>
