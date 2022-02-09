@@ -1,196 +1,196 @@
 type: edu
 files:
-- name: src/mealplanner/Main.kt
-  visible: true
-  text: |-
-    package mealplanner
+  - name: src/mealplanner/Main.kt
+    visible: true
+    text: |-
+      package mealplanner
+      
+      fun main() {
+          // write your code here
+      }
+    learner_created: false
+  - name: test/MealPlannerTest.kt
+    visible: false
+    text: |+
+      import org.hyperskill.hstest.dynamic.DynamicTest
+      import org.hyperskill.hstest.stage.StageTest
+      import org.hyperskill.hstest.testcase.CheckResult
+      import org.hyperskill.hstest.testing.TestedProgram
+      
+      class MealPlannerTest : StageTest<Any>() {
+      
+          @DynamicTest
+          fun normalExe1Test(): CheckResult {
+              val co = CheckOutput()
+              if (!co.start("Which meal do you want to add (breakfast, lunch, dinner)?") )
+                  return CheckResult(false, "Your program should ask the user about meal category: \"(breakfast, lunch, dinner)?\"")
+      
+              if (!co.input("lunch", "Input the meal's name:"))
+                  return CheckResult(false, "Your output should contain \"Input the meal's name:\"")
+      
+              if (!co.input("sushi", "Input the ingredients:"))
+                  return CheckResult(false, "Your output should contain \"Input the ingredients:\"")
+      
+              if (!co.input("salmon, rice, avocado", "Category: lunch"))
+                  return CheckResult(false, "Your output should contain \"Category: lunch\"")
+      
+              if (!co.inputNext("Name: sushi"))
+                  return CheckResult(false, "Your output should contain \"Name: sushi\"")
+      
+              if (!co.inputNext("Ingredients:"))
+                  return CheckResult(false, "Your output should contain \"Ingredients:\"")
+      
+              if (!co.inputNext("salmon", "rice", "avocado"))
+                  return CheckResult(false, "Your output should contain the ingredients list")
+      
+              if (!co.inputNext("The meal has been added!"))
+                  return CheckResult(false, "Your output should contain \"The meal has been added!\"")
+      
+              if (!co.programIsFinished() )
+                  return CheckResult(false, "The application didn't exit.")
+      
+              return CheckResult.correct()
+          }
+      
+          @DynamicTest
+          fun normalExe2Test(): CheckResult {
+              val co = CheckOutput()
+              if (!co.start("Which meal do you want to add (breakfast, lunch, dinner)?") )
+                  return CheckResult(false, "Your program should ask the user about meal category: \"(breakfast, lunch, dinner)?\"")
+      
+              if (!co.input("dinner", "Input the meal's name:"))
+                  return CheckResult(false, "Your output should contain \"Input the meal's name:\"")
+      
+              if (!co.input("salad", "Input the ingredients:"))
+                  return CheckResult(false, "Your output should contain \"Input the ingredients:\"")
+      
+              if (!co.input("lettuce, tomato,onion, cheese, olives", "Category: dinner"))
+                  return CheckResult(false, "Your output should contain \"Category: dinner\"")
+      
+              if (!co.inputNext("Name: salad"))
+                  return CheckResult(false, "Your output should contain \"Name: salad\"")
+      
+              if (!co.inputNext("Ingredients:"))
+                  return CheckResult(false, "Your output should contain \"Ingredients:\"")
+      
+              if (!co.inputNext("lettuce", "tomato", "onion", "cheese", "olives"))
+                  return CheckResult(false, "Your output should contain the ingredients list")
+      
+              if (!co.inputNext("The meal has been added!"))
+                  return CheckResult(false, "Your output should contain \"The meal has been added!\"")
+      
+              if (!co.programIsFinished() )
+                  return CheckResult(false, "The application didn't exit.")
+      
+              return CheckResult.correct()
+          }
+      
+          @DynamicTest
+          fun normalExe3Test(): CheckResult {
+              val co = CheckOutput()
+              if (!co.start("Which meal do you want to add (breakfast, lunch, dinner)?") )
+                  return CheckResult(false, "Your program should ask the user about meal category: \"(breakfast, lunch, dinner)?\"")
+      
+              if (!co.input("breakfast", "Input the meal's name:"))
+                  return CheckResult(false, "Your output should contain \"Input the meal's name:\"")
+      
+              if (!co.input("oatmeal", "Input the ingredients:"))
+                  return CheckResult(false, "Your output should contain \"Input the ingredients:\"")
+      
+              if (!co.input("oats, milk, banana, peanut butter", "Category: breakfast"))
+                  return CheckResult(false, "Your output should contain \"Category: breakfast\"")
+      
+              if (!co.inputNext("Name: oatmeal"))
+                  return CheckResult(false, "Your output should contain \"Name: oatmeal\"")
+      
+              if (!co.inputNext("Ingredients:"))
+                  return CheckResult(false, "Your output should contain \"Ingredients:\"")
+      
+              if (!co.inputNext("oats", "milk", "banana", "peanut butter"))
+                  return CheckResult(false, "Your output should contain the ingredients list")
+      
+              if (!co.inputNext("The meal has been added!"))
+                  return CheckResult(false, "Your output should contain \"The meal has been added!\"")
+      
+              if (!co.programIsFinished() )
+                  return CheckResult(false, "The application didn't exit.")
+      
+              return CheckResult.correct()
+          }
+      
+      }
+      
+      class CheckOutput {
+          private var main: TestedProgram = TestedProgram()
+          private var position = 0
+          private var caseInsensitive = true
+          private var trimOutput = true
+          private val arguments= mutableListOf<String>()
+          private var isStarted = false
+          private var lastOutput = ""
+      
+          private fun checkOutput(outputString: String, vararg checkStr: String): Boolean {
+              var searchPosition = position
+              for (cStr in checkStr) {
+                  val str = if (caseInsensitive) cStr.lowercase() else cStr
+                  val findPosition = outputString.indexOf(str, searchPosition)
+                  if (findPosition == -1) return false
+                  if ( outputString.substring(searchPosition until findPosition).isNotBlank() ) return false
+                  searchPosition = findPosition + str.length
+              }
+              position = searchPosition
+              return true
+          }
+      
+          fun start(vararg checkStr: String): Boolean {
+              return if (!isStarted) {
+                  var outputString = main.start(*arguments.toTypedArray())
+                  lastOutput = outputString
+                  if (trimOutput) outputString = outputString.trim()
+                  if (caseInsensitive) outputString = outputString.lowercase()
+                  isStarted = true
+                  checkOutput(outputString, *checkStr)
+              } else false
+          }
+      
+          fun stop() {
+              main.stop()
+          }
+      
+          fun input(input: String, vararg checkStr: String): Boolean {
+              if (main.isFinished) return false
+              var outputString = main.execute(input)
+              lastOutput = outputString
+              if (trimOutput) outputString = outputString.trim()
+              if (caseInsensitive) outputString = outputString.lowercase()
+              position = 0
+              return checkOutput(outputString, *checkStr)
+          }
+      
+          fun inputNext(vararg checkStr: String): Boolean {
+              var outputString = lastOutput
+              if (trimOutput) outputString = outputString.trim()
+              if (caseInsensitive) outputString = outputString.lowercase()
+              return checkOutput(outputString, *checkStr)
+          }
+      
+          fun getNextOutput(input: String): String {
+              if (main.isFinished) return ""
+              val outputString = main.execute(input)
+              lastOutput = outputString
+              position = 0
+              return  outputString
+          }
+      
+          fun getLastOutput(): String { return lastOutput }
+          fun programIsFinished(): Boolean  = main.isFinished
+          fun setArguments(vararg args: String) { arguments.addAll(args.toMutableList()) }
+          fun setCaseSensitivity(caseInsensitive: Boolean) { this.caseInsensitive = caseInsensitive }
+          fun setOutputTrim(trimOutput: Boolean) { this.trimOutput = trimOutput}
+      }
+    
 
-    fun main() {
-        // write your code here
-    }
-  learner_created: false
-- name: test/MealPlannerTest.kt
-  visible: false
-  text: |+
-    import org.hyperskill.hstest.dynamic.DynamicTest
-    import org.hyperskill.hstest.stage.StageTest
-    import org.hyperskill.hstest.testcase.CheckResult
-    import org.hyperskill.hstest.testing.TestedProgram
-
-    class MealPlannerTest : StageTest<Any>() {
-
-        @DynamicTest
-        fun normalExe1Test(): CheckResult {
-            val co = CheckOutput()
-            if (!co.start("Which meal do you want to add (breakfast, lunch, dinner)?") )
-                return CheckResult(false, "Your program should ask the user about meal category: \"(breakfast, lunch, dinner)?\"")
-
-            if (!co.input("lunch", "Input the meal's name:"))
-                return CheckResult(false, "Your output should contain \"Input the meal's name:\"")
-
-            if (!co.input("sushi", "Input the ingredients:"))
-                return CheckResult(false, "Your output should contain \"Input the ingredients:\"")
-
-            if (!co.input("salmon, rice, avocado", "Category: lunch"))
-                return CheckResult(false, "Your output should contain \"Category: lunch\"")
-
-            if (!co.inputNext("Name: sushi"))
-                return CheckResult(false, "Your output should contain \"Name: sushi\"")
-
-            if (!co.inputNext("Ingredients:"))
-                return CheckResult(false, "Your output should contain \"Ingredients:\"")
-
-            if (!co.inputNext("salmon", "rice", "avocado"))
-                return CheckResult(false, "Your output should contain the ingredients list")
-
-            if (!co.inputNext("The meal has been added!"))
-                return CheckResult(false, "Your output should contain \"The meal has been added!\"")
-
-            if (!co.programIsFinished() )
-                return CheckResult(false, "The application didn't exit.")
-
-            return CheckResult.correct()
-        }
-
-        @DynamicTest
-        fun normalExe2Test(): CheckResult {
-            val co = CheckOutput()
-            if (!co.start("Which meal do you want to add (breakfast, lunch, dinner)?") )
-                return CheckResult(false, "Your program should ask the user about meal category: \"(breakfast, lunch, dinner)?\"")
-
-            if (!co.input("dinner", "Input the meal's name:"))
-                return CheckResult(false, "Your output should contain \"Input the meal's name:\"")
-
-            if (!co.input("salad", "Input the ingredients:"))
-                return CheckResult(false, "Your output should contain \"Input the ingredients:\"")
-
-            if (!co.input("lettuce, tomato,onion, cheese, olives", "Category: dinner"))
-                return CheckResult(false, "Your output should contain \"Category: dinner\"")
-
-            if (!co.inputNext("Name: salad"))
-                return CheckResult(false, "Your output should contain \"Name: salad\"")
-
-            if (!co.inputNext("Ingredients:"))
-                return CheckResult(false, "Your output should contain \"Ingredients:\"")
-
-            if (!co.inputNext("lettuce", "tomato", "onion", "cheese", "olives"))
-                return CheckResult(false, "Your output should contain the ingredients list")
-
-            if (!co.inputNext("The meal has been added!"))
-                return CheckResult(false, "Your output should contain \"The meal has been added!\"")
-
-            if (!co.programIsFinished() )
-                return CheckResult(false, "The application didn't exit.")
-
-            return CheckResult.correct()
-        }
-
-        @DynamicTest
-        fun normalExe3Test(): CheckResult {
-            val co = CheckOutput()
-            if (!co.start("Which meal do you want to add (breakfast, lunch, dinner)?") )
-                return CheckResult(false, "Your program should ask the user about meal category: \"(breakfast, lunch, dinner)?\"")
-
-            if (!co.input("breakfast", "Input the meal's name:"))
-                return CheckResult(false, "Your output should contain \"Input the meal's name:\"")
-
-            if (!co.input("oatmeal", "Input the ingredients:"))
-                return CheckResult(false, "Your output should contain \"Input the ingredients:\"")
-
-            if (!co.input("oats, milk, banana, peanut butter", "Category: breakfast"))
-                return CheckResult(false, "Your output should contain \"Category: breakfast\"")
-
-            if (!co.inputNext("Name: oatmeal"))
-                return CheckResult(false, "Your output should contain \"Name: oatmeal\"")
-
-            if (!co.inputNext("Ingredients:"))
-                return CheckResult(false, "Your output should contain \"Ingredients:\"")
-
-            if (!co.inputNext("oats", "milk", "banana", "peanut butter"))
-                return CheckResult(false, "Your output should contain the ingredients list")
-
-            if (!co.inputNext("The meal has been added!"))
-                return CheckResult(false, "Your output should contain \"The meal has been added!\"")
-
-            if (!co.programIsFinished() )
-                return CheckResult(false, "The application didn't exit.")
-
-            return CheckResult.correct()
-        }
-
-    }
-
-    class CheckOutput {
-        private var main: TestedProgram = TestedProgram()
-        private var position = 0
-        private var caseInsensitive = true
-        private var trimOutput = true
-        private val arguments= mutableListOf<String>()
-        private var isStarted = false
-        private var lastOutput = ""
-
-        private fun checkOutput(outputString: String, vararg checkStr: String): Boolean {
-            var searchPosition = position
-            for (cStr in checkStr) {
-                val str = if (caseInsensitive) cStr.lowercase() else cStr
-                val findPosition = outputString.indexOf(str, searchPosition)
-                if (findPosition == -1) return false
-                if ( outputString.substring(searchPosition until findPosition).isNotBlank() ) return false
-                searchPosition = findPosition + str.length
-            }
-            position = searchPosition
-            return true
-        }
-
-        fun start(vararg checkStr: String): Boolean {
-            return if (!isStarted) {
-                var outputString = main.start(*arguments.toTypedArray())
-                lastOutput = outputString
-                if (trimOutput) outputString = outputString.trim()
-                if (caseInsensitive) outputString = outputString.lowercase()
-                isStarted = true
-                checkOutput(outputString, *checkStr)
-            } else false
-        }
-
-        fun stop() {
-            main.stop()
-        }
-
-        fun input(input: String, vararg checkStr: String): Boolean {
-            if (main.isFinished) return false
-            var outputString = main.execute(input)
-            lastOutput = outputString
-            if (trimOutput) outputString = outputString.trim()
-            if (caseInsensitive) outputString = outputString.lowercase()
-            position = 0
-            return checkOutput(outputString, *checkStr)
-        }
-
-        fun inputNext(vararg checkStr: String): Boolean {
-            var outputString = lastOutput
-            if (trimOutput) outputString = outputString.trim()
-            if (caseInsensitive) outputString = outputString.lowercase()
-            return checkOutput(outputString, *checkStr)
-        }
-
-        fun getNextOutput(input: String): String {
-            if (main.isFinished) return ""
-            val outputString = main.execute(input)
-            lastOutput = outputString
-            position = 0
-            return  outputString
-        }
-
-        fun getLastOutput(): String { return lastOutput }
-        fun programIsFinished(): Boolean  = main.isFinished
-        fun setArguments(vararg args: String) { arguments.addAll(args.toMutableList()) }
-        fun setCaseSensitivity(caseInsensitive: Boolean) { this.caseInsensitive = caseInsensitive }
-        fun setOutputTrim(trimOutput: Boolean) { this.trimOutput = trimOutput}
-    }
-
-
-  learner_created: false
+    learner_created: false
 feedback_link: https://hyperskill.org/learn/step/11008#comment
 status: Solved
 record: 2
