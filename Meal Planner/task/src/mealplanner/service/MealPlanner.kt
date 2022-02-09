@@ -13,14 +13,15 @@ object MealPlanner {
      * @param meal the meal to add
      */
     fun addMeal(meal: Meal) {
-        DataBaseManager.init()
         // Insert Meal Data
         var insert = """
             INSERT INTO meals (category, meal)
             VALUES ('${meal.category}', '${meal.name}')
             returning meal_id
         """.trimIndent()
+        DataBaseManager.open()
         val mealId = DataBaseManager.executeQuery(insert).getInt(1)
+        DataBaseManager.close()
         // println(mealId)
 
         // Insert Meal Ingredients
@@ -30,29 +31,33 @@ object MealPlanner {
                 VALUES ($mealId, '${it}')
                 returning ingredient_id
             """.trimIndent()
+            DataBaseManager.open()
             DataBaseManager.executeQuery(insert)
+            DataBaseManager.close()
         }
-        DataBaseManager.close()
     }
 
     /**
      * Meals is Empty
      * @return true if there are no meals in the database
      */
-    fun isEmpty(): Boolean {
-        DataBaseManager.init()
+    fun isEmpty(category: String): Boolean {
         val select = """
-            SELECT * FROM meals
+            SELECT * FROM meals WHERE category = '$category'
         """.trimIndent()
+        DataBaseManager.open()
         val result = DataBaseManager.executeQuery(select)
-        return !result.next()
+        val isEmpty = !result.next()
+        DataBaseManager.close()
+        return isEmpty
     }
 
     /**
      * Show all meals
      */
-    fun showMeals() {
-        val meals = getMeals()
+    fun showMeals(category: String) {
+        val meals = getMeals(category)
+        println("Category: $category")
         meals.forEach {
             println(it)
         }
@@ -62,13 +67,13 @@ object MealPlanner {
      * Get all meals
      * @return a list of meals
      */
-    private fun getMeals(): List<Meal> {
+    private fun getMeals(category: String): List<Meal> {
         val meals = mutableListOf<Meal>()
-        DataBaseManager.init()
         // Select Meals
         val selectMeals = """
-                SELECT * FROM meals
+                SELECT * FROM meals WHERE category = '$category'
             """.trimIndent()
+        DataBaseManager.open()
         val resultMeals = DataBaseManager.executeQuery(selectMeals)
 
         while (resultMeals.next()) {
@@ -91,7 +96,6 @@ object MealPlanner {
             meals.add(Meal(name = mealName, category = mealCategory, ingredients = ingredients))
         }
         DataBaseManager.close()
-
         return meals
     }
 
@@ -100,7 +104,7 @@ object MealPlanner {
      */
     fun init() {
         // Init Data Base
-        DataBaseManager.init()
+        DataBaseManager.open()
         // Delete Tables
         // deleteTableMeals()
         // deleteTableIngredients()

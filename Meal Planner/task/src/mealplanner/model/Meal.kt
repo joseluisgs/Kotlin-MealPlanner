@@ -8,6 +8,6 @@ data class Meal(val category: String, val name: String, val ingredients: List<St
      * Returns a string representation of the meal.
      */
     override fun toString(): String {
-        return "Category: $category\nName: $name\nIngredients:\n${ingredients.joinToString("\n")}\n"
+        return "Name: $name\nIngredients:\n${ingredients.joinToString("\n")}\n"
     }
 }

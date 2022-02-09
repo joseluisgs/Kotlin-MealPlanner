@@ -13,8 +13,10 @@ object DataBaseManager {
     /**
      * This method is used to connect to the database.
      */
-    fun init() {
+    fun open() {
         connection = DriverManager.getConnection("jdbc:sqlite:meals.db")
+        connection.autoCommit = true
+
     }
 
     /**
@@ -35,6 +37,7 @@ object DataBaseManager {
     fun executeQuery(sql: String): ResultSet {
         statement = connection.createStatement()
         return statement.executeQuery(sql)
+
     }
 
     /**
@@ -44,4 +47,5 @@ object DataBaseManager {
         statement.close()
         connection.close()
     }
+
 }

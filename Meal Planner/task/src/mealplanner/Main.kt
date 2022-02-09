@@ -70,7 +70,7 @@ fun addMeal() {
  * @return list of ingredients
  */
 private fun readMealIngredients(): List<String> {
-    var ingredients = listOf<String>()
+    var ingredients: List<String>
     do {
         var ok = true
         println("Input the ingredients:")
@@ -128,9 +128,19 @@ private fun readMealCategory(): String {
  * Show meals
  */
 fun showMeals() {
-    if (MealPlanner.isEmpty()) {
-        println("No meals saved. Add a meal first.")
+    lateinit var category: String
+    val validCategories = listOf("breakfast", "lunch", "dinner")
+    do {
+        println("Which category do you want to print (breakfast, lunch, dinner)?")
+        category = readln()
+        if (!validCategories.contains(category)) {
+            println("Wrong meal category! Choose from: breakfast, lunch, dinner.")
+        }
+    } while (!validCategories.contains(category))
+
+    if (MealPlanner.isEmpty(category)) {
+        println("No meals found.")
     } else {
-        MealPlanner.showMeals()
+        MealPlanner.showMeals(category)
     }
 }

@@ -15,3 +15,6 @@ bin/
 *.iws
 *.ipruploads/
 uploads/
+
+
+meals.db
