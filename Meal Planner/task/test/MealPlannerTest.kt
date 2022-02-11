@@ -26,8 +26,8 @@ val mealsList = mutableListOf<MyMealTestData>(
 
 class MealPlannerTest : StageTest<Any>() {
 
-    @DynamicTest(order = 1)
-    fun normalExe12Test(): CheckResult {
+    @DynamicTest(order = 0)
+    fun normalExe21Test(): CheckResult {
         try {
             val dbFile = File("meals.db")
             if (dbFile.exists()) dbFile.delete()
@@ -36,10 +36,47 @@ class MealPlannerTest : StageTest<Any>() {
         }
 
         val co = CheckOutput()
-        if (!co.start("What would you like to do (add, show, plan, exit)?"))
+        if (!co.start("What would you like to do (add, show, plan, save, exit)?"))
             return CheckResult(
                 false,
-                "Your program should ask the user about the required action: \"(add, show, plan, exit)?\""
+                "Your program should ask the user about the required action: \"(add, show, plan, save, exit)?\""
+            )
+
+        val dbUrl = "jdbc:sqlite:meals.db"
+        val tables = listOf(
+            dbTable(
+                "ingredients",
+                listOf(Pair("ingredient", "text"), Pair("ingredient_id", "integer"), Pair("meal_id", "integer"))
+            ),
+            dbTable("meals", listOf(Pair("category", "text"), Pair("meal", "text"), Pair("meal_id", "integer")))
+        )
+
+        if (!co.input("save", "Unable to save. Plan your meals first."))
+            return CheckResult(false, "Your output should contain \"Unable to save. Plan your meals first.\"")
+
+        if (!co.input("exit", "Bye!"))
+            return CheckResult(false, "Your output should contain \"Bye!\"")
+
+        if (!co.programIsFinished())
+            return CheckResult(false, "The application didn't exit.")
+
+        return CheckResult.correct()
+    }
+
+    @DynamicTest(order = 1)
+    fun normalExe16Test(): CheckResult {
+        try {
+            val dbFile = File("meals.db")
+            if (dbFile.exists()) dbFile.delete()
+        } catch (e: Exception) {
+            return CheckResult(false, "An exception was thrown, while trying to delete a database file.")
+        }
+
+        val co = CheckOutput()
+        if (!co.start("What would you like to do (add, show, plan, save, exit)?"))
+            return CheckResult(
+                false,
+                "Your program should ask the user about the required action: \"(add, show, plan, save, exit)?\""
             )
 
         val dbUrl = "jdbc:sqlite:meals.db"
@@ -67,7 +104,7 @@ class MealPlannerTest : StageTest<Any>() {
     }
 
     @DynamicTest(order = 2)
-    fun normalExe13Test(): CheckResult {
+    fun normalExe17Test(): CheckResult {
         try {
             val dbFile = File("meals.db")
             if (dbFile.exists()) dbFile.delete()
@@ -77,10 +114,10 @@ class MealPlannerTest : StageTest<Any>() {
 
         try {
             val co = CheckOutput()
-            if (!co.start("What would you like to do (add, show, plan, exit)?"))
+            if (!co.start("What would you like to do (add, show, plan, save, exit)?"))
                 return CheckResult(
                     false,
-                    "Your program should ask the user about the required action: \"(add, show, plan, exit)?\""
+                    "Your program should ask the user about the required action: \"(add, show, plan, save, exit)?\""
                 )
 
             if (!co.input("add", "Which meal do you want to add (breakfast, lunch, dinner)?"))
@@ -98,10 +135,10 @@ class MealPlannerTest : StageTest<Any>() {
             if (!co.input("salmon, rice, avocado", "The meal has been added!"))
                 return CheckResult(false, "Your output should contain \"The meal has been added!\"")
 
-            if (!co.inputNext("What would you like to do (add, show, plan, exit)?"))
+            if (!co.inputNext("What would you like to do (add, show, plan, save, exit)?"))
                 return CheckResult(
                     false,
-                    "Your program should ask the user about the required action: \"(add, show, plan, exit)?\""
+                    "Your program should ask the user about the required action: \"(add, show, plan, save, exit)?\""
                 )
 
             if (!co.input("add", "Which meal do you want to add (breakfast, lunch, dinner)?"))
@@ -119,10 +156,10 @@ class MealPlannerTest : StageTest<Any>() {
             if (!co.input("eggs, milk, cheese", "The meal has been added!"))
                 return CheckResult(false, "Your output should contain \"The meal has been added!\"")
 
-            if (!co.inputNext("What would you like to do (add, show, plan, exit)?"))
+            if (!co.inputNext("What would you like to do (add, show, plan, save, exit)?"))
                 return CheckResult(
                     false,
-                    "Your program should ask the user about the required action: \"(add, show, plan, exit)?\""
+                    "Your program should ask the user about the required action: \"(add, show, plan, save, exit)?\""
                 )
 
             if (!co.input("add", "Which meal do you want to add (breakfast, lunch, dinner)?"))
@@ -140,10 +177,10 @@ class MealPlannerTest : StageTest<Any>() {
             if (!co.input("oats, milk, banana, peanut butter", "The meal has been added!"))
                 return CheckResult(false, "Your output should contain \"The meal has been added!\"")
 
-            if (!co.inputNext("What would you like to do (add, show, plan, exit)?"))
+            if (!co.inputNext("What would you like to do (add, show, plan, save, exit)?"))
                 return CheckResult(
                     false,
-                    "Your program should ask the user about the required action: \"(add, show, plan, exit)?\""
+                    "Your program should ask the user about the required action: \"(add, show, plan, save, exit)?\""
                 )
 
             if (!co.input("show", "Which category do you want to print (breakfast, lunch, dinner)?"))
@@ -159,10 +196,10 @@ class MealPlannerTest : StageTest<Any>() {
             )
                 return CheckResult(false, "Wrong \"show\" output for a saved meal.")
 
-            if (!co.inputNext("What would you like to do (add, show, plan, exit)?"))
+            if (!co.inputNext("What would you like to do (add, show, plan, save, exit)?"))
                 return CheckResult(
                     false,
-                    "Your program should ask the user about the required action: \"(add, show, plan, exit)?\""
+                    "Your program should ask the user about the required action: \"(add, show, plan, save, exit)?\""
                 )
 
             if (!co.input("show", "Which category do you want to print (breakfast, lunch, dinner)?"))
@@ -178,10 +215,10 @@ class MealPlannerTest : StageTest<Any>() {
             )
                 return CheckResult(false, "Wrong \"show\" output for a saved meal.")
 
-            if (!co.inputNext("What would you like to do (add, show, plan, exit)?"))
+            if (!co.inputNext("What would you like to do (add, show, plan, save, exit)?"))
                 return CheckResult(
                     false,
-                    "Your program should ask the user about the required action: \"(add, show, plan, exit)?\""
+                    "Your program should ask the user about the required action: \"(add, show, plan, save, exit)?\""
                 )
 
             if (!co.input("exit", "Bye!"))
@@ -197,7 +234,7 @@ class MealPlannerTest : StageTest<Any>() {
     }
 
     @DynamicTest(order = 3)
-    fun normalExe14Test(): CheckResult {
+    fun normalExe18Test(): CheckResult {
         try {
             val dbFile = File("meals.db")
             if (!dbFile.exists()) return CheckResult(false, "The meals.db database file doesn't exist.")
@@ -206,10 +243,10 @@ class MealPlannerTest : StageTest<Any>() {
         }
         try {
             val co = CheckOutput()
-            if (!co.start("What would you like to do (add, show, plan, exit)?"))
+            if (!co.start("What would you like to do (add, show, plan, save, exit)?"))
                 return CheckResult(
                     false,
-                    "Your program should ask the user about the required action: \"(add, show, plan, exit)?\""
+                    "Your program should ask the user about the required action: \"(add, show, plan, save, exit)?\""
                 )
 
             if (!co.input("show", "Which category do you want to print (breakfast, lunch, dinner)?"))
@@ -225,10 +262,10 @@ class MealPlannerTest : StageTest<Any>() {
             )
                 return CheckResult(false, "Wrong \"show\" output for a saved meal.")
 
-            if (!co.inputNext("What would you like to do (add, show, plan, exit)?"))
+            if (!co.inputNext("What would you like to do (add, show, plan, save, exit)?"))
                 return CheckResult(
                     false,
-                    "Your program should ask the user about the required action: \"(add, show, plan, exit)?\""
+                    "Your program should ask the user about the required action: \"(add, show, plan, save, exit)?\""
                 )
 
             if (!co.input("show", "Which category do you want to print (breakfast, lunch, dinner)?"))
@@ -244,10 +281,10 @@ class MealPlannerTest : StageTest<Any>() {
             )
                 return CheckResult(false, "Wrong \"show\" output for a saved meal.")
 
-            if (!co.inputNext("What would you like to do (add, show, plan, exit)?"))
+            if (!co.inputNext("What would you like to do (add, show, plan, save, exit)?"))
                 return CheckResult(
                     false,
-                    "Your program should ask the user about the required action: \"(add, show, plan, exit)?\""
+                    "Your program should ask the user about the required action: \"(add, show, plan, save, exit)?\""
                 )
 
             if (!co.input("show", "Which category do you want to print (breakfast, lunch, dinner)?"))
@@ -275,7 +312,7 @@ class MealPlannerTest : StageTest<Any>() {
     }
 
     @DynamicTest(order = 4)
-    fun normalExe15Test(): CheckResult {
+    fun normalExe19Test(): CheckResult {
         try {
             val dbFile = File("meals.db")
             if (dbFile.exists()) dbFile.delete()
@@ -285,10 +322,10 @@ class MealPlannerTest : StageTest<Any>() {
 
         try {
             val co = CheckOutput()
-            if (!co.start("What would you like to do (add, show, plan, exit)?"))
+            if (!co.start("What would you like to do (add, show, plan, save, exit)?"))
                 return CheckResult(
                     false,
-                    "Your program should ask the user about the required action: \"(add, show, plan, exit)?\""
+                    "Your program should ask the user about the required action: \"(add, show, plan, save, exit)?\""
                 )
 
 
@@ -308,10 +345,10 @@ class MealPlannerTest : StageTest<Any>() {
                 if (!co.input(meal.ingredients.joinToString(","), "The meal has been added!"))
                     return CheckResult(false, "Your output should contain \"The meal has been added!\"")
 
-                if (!co.inputNext("What would you like to do (add, show, plan, exit)?"))
+                if (!co.inputNext("What would you like to do (add, show, plan, save, exit)?"))
                     return CheckResult(
                         false,
-                        "Your program should ask the user about the required action: \"(add, show, plan, exit)?\""
+                        "Your program should ask the user about the required action: \"(add, show, plan, save, exit)?\""
                     )
 
             }
@@ -366,6 +403,65 @@ class MealPlannerTest : StageTest<Any>() {
             if (!co.programIsFinished())
                 return CheckResult(false, "The application didn't exit.")
 
+        } catch (e: Exception) {
+            return CheckResult(false, "An exception was thrown while testing - ${e.message}")
+        }
+
+        return CheckResult.correct()
+    }
+
+    @DynamicTest(order = 5)
+    fun normalExe20Test(): CheckResult {
+        try {
+            val dbFile = File("meals.db")
+            if (!dbFile.exists()) return CheckResult(false, "The meals.db database file doesn't exist.")
+            val saveFile = File("plan.txt")
+            if (saveFile.exists()) saveFile.delete()
+        } catch (e: Exception) {
+            return CheckResult(false, "An exception was thrown, while trying to check a database file.")
+        }
+        try {
+            val co = CheckOutput()
+            if (!co.start("What would you like to do (add, show, plan, save, exit)?"))
+                return CheckResult(
+                    false,
+                    "Your program should ask the user about the required action: \"(add, show, plan, save, exit)?\""
+                )
+
+            if (!co.input("save", "Input a filename:"))
+                return CheckResult(false, "Your output should contain: \"Input a filename:\"")
+
+            if (!co.input("plan.txt", "Saved!"))
+                return CheckResult(false, "Your output should contain: \"Saved!\"")
+
+            if (!co.inputNext("What would you like to do (add, show, plan, save, exit)?"))
+                return CheckResult(
+                    false,
+                    "Your program should ask the user about the required action: \"(add, show, plan, save, exit)?\""
+                )
+
+            val ingredientsFile = File("plan.txt")
+            if (!ingredientsFile.exists()) return CheckResult(false, "The ingredient file doesn't exist.")
+
+            val ingredientsInPlan = listOf(
+                "avocado x2", "bacon", "banana x2", "beef steak x2", "bread x3", "carrots x2",
+                "cheese x9", "chicken x2", "coconut milk x2", "curry x2", "eggs x5",
+                "flour x2", "ham x2", "lettuce x3", "milk x6", "oats x2", "olives x3",
+                "onion", "orzo", "peanut butter x2", "pumpkin x2", "rice x2", "salami x2",
+                "salmon x2", "sausages", "tomato x6", "tomatoes"
+            )
+            val lines = ingredientsFile.readLines().map { it.trim() }
+            for (line in lines) if (!ingredientsInPlan.contains(line))
+                return CheckResult(
+                    false,
+                    "Line $line doesn't exist in file."
+                )
+
+            if (!co.input("exit", "Bye!"))
+                return CheckResult(false, "Your output should contain \"Bye!\"")
+
+            if (!co.programIsFinished())
+                return CheckResult(false, "The application didn't exit.")
         } catch (e: Exception) {
             return CheckResult(false, "An exception was thrown while testing - ${e.message}")
         }
@@ -441,7 +537,7 @@ class CheckOutput {
     var position = 0
     private var caseInsensitive = true
     private var trimOutput = true
-    private val arguments= mutableListOf<String>()
+    private val arguments = mutableListOf<String>()
     private var isStarted = false
     private var lastOutput = ""
 
@@ -451,7 +547,7 @@ class CheckOutput {
             val str = if (caseInsensitive) cStr.lowercase() else cStr
             val findPosition = outputString.indexOf(str, searchPosition)
             if (findPosition == -1) return false
-            if ( outputString.substring(searchPosition until findPosition).isNotBlank() ) return false
+            if (outputString.substring(searchPosition until findPosition).isNotBlank()) return false
             searchPosition = findPosition + str.length
         }
         position = searchPosition
@@ -495,14 +591,25 @@ class CheckOutput {
         val outputString = main.execute(input)
         lastOutput = outputString
         position = 0
-        return  outputString
+        return outputString
     }
 
-    fun getLastOutput(): String { return lastOutput }
-    fun programIsFinished(): Boolean  = main.isFinished
-    fun setArguments(vararg args: String) { arguments.addAll(args.toMutableList()) }
-    fun setCaseSensitivity(caseInsensitive: Boolean) { this.caseInsensitive = caseInsensitive }
-    fun setOutputTrim(trimOutput: Boolean) { this.trimOutput = trimOutput}
+    fun getLastOutput(): String {
+        return lastOutput
+    }
+
+    fun programIsFinished(): Boolean = main.isFinished
+    fun setArguments(vararg args: String) {
+        arguments.addAll(args.toMutableList())
+    }
+
+    fun setCaseSensitivity(caseInsensitive: Boolean) {
+        this.caseInsensitive = caseInsensitive
+    }
+
+    fun setOutputTrim(trimOutput: Boolean) {
+        this.trimOutput = trimOutput
+    }
 }
 
 

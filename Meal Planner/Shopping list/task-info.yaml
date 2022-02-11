@@ -642,6 +642,186 @@ files:
 
 
   learner_created: false
+- name: src/mealplanner/service/MealPlanner.kt
+  visible: true
+  text: "package mealplanner.service\n\nimport mealplanner.controller.DataBaseManager\n\
+    import mealplanner.model.Meal\nimport mealplanner.model.PlanItem\n\n/**\n * Meal\
+    \ Planner Service\n */\nobject MealPlanner {\n\n    /**\n     * Add a meal to\
+    \ the database\n     * @param meal the meal to add\n     */\n    fun saveMeal(meal:\
+    \ Meal) {\n        // Insert Meal Data\n        var insert = \"\"\"\n        \
+    \    INSERT INTO meals (category, meal)\n            VALUES ('${meal.category}',\
+    \ '${meal.name}')\n            returning meal_id\n        \"\"\".trimIndent()\n\
+    \        DataBaseManager.open()\n        val mealId = DataBaseManager.executeQuery(insert).getInt(1)\n\
+    \        DataBaseManager.close()\n        // println(mealId)\n\n        // Insert\
+    \ Meal Ingredients\n        meal.ingredients.forEach {\n            insert = \"\
+    \"\"\n                INSERT INTO ingredients (meal_id, ingredient)\n        \
+    \        VALUES ($mealId, '${it}')\n                returning ingredient_id\n\
+    \            \"\"\".trimIndent()\n            DataBaseManager.open()\n       \
+    \     DataBaseManager.executeQuery(insert)\n            DataBaseManager.close()\n\
+    \        }\n    }\n\n    /**\n     * Meals is Empty\n     * @return true if there\
+    \ are no meals in the database\n     */\n    fun isEmpty(category: String): Boolean\
+    \ {\n        val select = \"\"\"\n            SELECT * FROM meals WHERE category\
+    \ = '$category'\n        \"\"\".trimIndent()\n        DataBaseManager.open()\n\
+    \        val result = DataBaseManager.executeQuery(select)\n        val isEmpty\
+    \ = !result.next()\n        DataBaseManager.close()\n        return isEmpty\n\
+    \    }\n\n\n    /**\n     * Get all meals from a category\n     * @param category\
+    \ the category to get meals from\n     * @return a list of meals\n     */\n  \
+    \  fun getMeals(category: String, order: Boolean = false): List<Meal> {\n    \
+    \    val meals = mutableListOf<Meal>()\n        // Select Meals\n        val selectMeals\
+    \ = if (order) {\n            \"\"\"\n                SELECT * FROM meals WHERE\
+    \ category = '$category'\n                ORDER BY meal ASC\n            \"\"\"\
+    .trimIndent()\n        } else {\n            \"\"\"\n                SELECT *\
+    \ FROM meals WHERE category = '$category'\n            \"\"\".trimIndent()\n \
+    \       }\n        DataBaseManager.open()\n        val resultMeals = DataBaseManager.executeQuery(selectMeals)\n\
+    \n        while (resultMeals.next()) {\n            val mealId = resultMeals.getInt(\"\
+    meal_id\")\n            val mealName = resultMeals.getString(\"meal\")\n     \
+    \       val mealCategory = resultMeals.getString(\"category\")\n            val\
+    \ ingredients = mutableListOf<String>()\n\n            // Select Ingredients of\
+    \ a meal\n            val selectIngredients = \"\"\"\n                    SELECT\
+    \ * FROM ingredients\n                    WHERE meal_id = $mealId\n          \
+    \      \"\"\".trimIndent()\n            val resultIngredients = DataBaseManager.executeQuery(selectIngredients)\n\
+    \            while (resultIngredients.next()) {\n                ingredients.add(resultIngredients.getString(\"\
+    ingredient\"))\n            }\n\n            // add to list\n            meals.add(Meal(id\
+    \ = mealId, name = mealName, category = mealCategory, ingredients = ingredients))\n\
+    \        }\n        DataBaseManager.close()\n        return meals\n    }\n\n \
+    \   /**\n     * Save a week plan to the database\n     * @param plan the plan\
+    \ to save\n     */\n    fun savePlan(plan: List<PlanItem>) {\n        DataBaseManager.open()\n\
+    \        plan.forEach {\n            val insert = \"\"\"\n                INSERT\
+    \ INTO plan (day, category, meal_id)\n                VALUES ('${it.day}', '${it.category}',\
+    \ '${it.meal.id}')\n                returning plan_id\n            \"\"\".trimIndent()\n\
+    \n            DataBaseManager.executeQuery(insert)\n        }\n        DataBaseManager.close()\n\
+    \    }\n\n    /**\n     * Dele the plan from the database\n     */\n    fun deletePlanning()\
+    \ {\n        DataBaseManager.open()\n        val delete = \"\"\"\n           \
+    \ DELETE FROM plan\n        \"\"\".trimIndent()\n        DataBaseManager.executeUpdate(delete)\n\
+    \        DataBaseManager.close()\n    }\n\n    /**\n     * Initialize the database\
+    \ of Meals\n     */\n    fun init() {\n        // Init Data Base\n        DataBaseManager.open()\n\
+    \        // Delete Tables\n        // deleteTableMeals()\n        // deleteTableIngredients()\n\
+    \        // deleteTablePlan()\n        // Create Tables\n        createTableMeals()\n\
+    \        createTableIngredients()\n        createTablePlan()\n        DataBaseManager.close()\n\
+    \    }\n\n    /**\n     * Close the database\n     */\n    fun close() {\n   \
+    \     // Close Data Base\n        DataBaseManager.close()\n    }\n\n    /**\n\
+    \     * Create the table of Meals\n     */\n    private fun createTableMeals()\
+    \ {\n        val meals = \"\"\"\n            CREATE TABLE IF NOT EXISTS meals\
+    \ (\n                meal_id INTEGER PRIMARY KEY AUTOINCREMENT,\n            \
+    \    category TEXT NOT NULL,\n                meal TEXT NOT NULL\n           \
+    \ );\n        \"\"\".trimIndent()\n        DataBaseManager.executeUpdate(meals)\n\
+    \    }\n\n    /**\n     * Create the table of Ingredients\n     */\n    private\
+    \ fun createTableIngredients() {\n        val ingredients = \"\"\"\n         \
+    \   CREATE TABLE IF NOT EXISTS ingredients (\n                ingredient_id INTEGER\
+    \ PRIMARY KEY AUTOINCREMENT,\n                meal_id INTEGER NOT NULL REFERENCES\
+    \ meals(meal_id),\n                ingredient TEXT NOT NULL\n            );\n\
+    \        \"\"\".trimIndent()\n        DataBaseManager.executeUpdate(ingredients)\n\
+    \    }\n\n    /**\n     * Create the table of Plannings\n     */\n    private\
+    \ fun createTablePlan() {\n        val plannings = \"\"\"\n            CREATE\
+    \ TABLE IF NOT EXISTS plan (\n                plan_id INTEGER PRIMARY KEY AUTOINCREMENT,\n\
+    \                day TEXT NOT NULL,\n                category TEXT NOT NULL,\n\
+    \                meal_id\tINTEGER NOT NULL REFERENCES meals(meal_id)\n       \
+    \     ); \n        \"\"\".trimIndent()\n        DataBaseManager.executeUpdate(plannings)\n\
+    \    }\n\n    /**\n     * Delete the table of Meals\n     */\n    private fun\
+    \ deleteTableIngredients() {\n        val drop = \"\"\"\n            DROP TABLE\
+    \ IF EXISTS meals\n        \"\"\".trimIndent()\n        DataBaseManager.executeUpdate(drop)\n\
+    \    }\n\n    /**\n     * Delete the table of Ingredients\n     */\n    private\
+    \ fun deleteTableMeals() {\n        val drop = \"\"\"\n            DROP TABLE\
+    \ IF EXISTS ingredients\n        \"\"\".trimIndent()\n        DataBaseManager.executeUpdate(drop)\n\
+    \    }\n\n    /**\n     * Delete the table of Plannings\n     */\n    private\
+    \ fun deleteTablePlan() {\n        val drop = \"\"\"\n            DROP TABLE IF\
+    \ EXISTS plan\n        \"\"\".trimIndent()\n        DataBaseManager.executeUpdate(drop)\n\
+    \    }\n}"
+  learner_created: true
+- name: src/mealplanner/model/Meal.kt
+  visible: true
+  text: |
+    package mealplanner.model
+
+    /**
+     * POKO for a meal.
+     */
+    data class Meal(val id: Int, val category: String, val name: String, val ingredients: List<String>) {
+        constructor(category: String, name: String, ingredients: List<String>) : this(-1, category, name, ingredients)
+
+        /**
+         * Returns a string representation of the meal.
+         */
+        override fun toString(): String {
+            return "Name: $name\nIngredients:\n${ingredients.joinToString("\n")}\n"
+        }
+    }
+  learner_created: true
+- name: src/mealplanner/model/PlanItem.kt
+  visible: true
+  text: |
+    package mealplanner.model
+
+    /**
+     * POKO of a plan item.
+     */
+    data class PlanItem(val day: String, val category: String, val meal: Meal)
+  learner_created: true
+- name: src/mealplanner/controller/DataBaseManager.kt
+  visible: true
+  text: |-
+    package mealplanner.controller
+
+    import java.sql.DriverManager
+    import java.sql.ResultSet
+
+    /**
+     * This class is used to connect to the database and execute queries.
+     */
+    object DataBaseManager {
+        private lateinit var connection: java.sql.Connection
+        private lateinit var statement: java.sql.Statement
+
+        /**
+         * This method is used to connect to the database.
+         */
+        fun open() {
+            connection = DriverManager.getConnection("jdbc:sqlite:meals.db")
+            connection.autoCommit = true
+
+        }
+
+        /**
+         * This method is used to execute Update Query.
+         * @param query The query to execute.
+         * @return The result of the query.
+         */
+        fun executeUpdate(sql: String) {
+            statement = connection.createStatement()
+            statement.execute(sql)
+        }
+
+        /**
+         * This method is used to execute a Query.
+         * @param query The query to execute.
+         * @return The result of the query.
+         */
+        fun executeQuery(sql: String): ResultSet {
+            statement = connection.createStatement()
+            return statement.executeQuery(sql)
+
+        }
+
+        /**
+         * This method is used to close the connection to the database.
+         */
+        fun close() {
+            statement.close()
+            connection.close()
+        }
+
+    }
+  learner_created: true
+- name: src/mealplanner/model/ShoppingItem.kt
+  visible: true
+  learner_created: true
+- name: plan.txt
+  visible: true
+  learner_created: true
 feedback_link: https://hyperskill.org/learn/step/11013#comment
-status: Unchecked
+status: Solved
+feedback:
+  message: Well done! You've finished the project. Select a new project on <a href="https://hyperskill.org/projects">JetBrains
+    Academy</a> to continue learning.
+  time: Fri, 11 Feb 2022 17:11:16 UTC
 record: -1

@@ -11,11 +11,19 @@ CREATE TABLE IF NOT EXISTS "ingredients" (
 	"ingredient_id"	INTEGER,
 	"meal_id"	INTEGER NOT NULL,
 	"ingredient"	TEXT NOT NULL,
-	FOREIGN KEY("meal_id") REFERENCES "meals"("meal_id"),
-	FOREIGN KEY("meal_id") REFERENCES "meals"("meal_id"),
-	PRIMARY KEY("ingredient_id" AUTOINCREMENT)
+	PRIMARY KEY("ingredient_id" AUTOINCREMENT),
+	FOREIGN KEY("meal_id") REFERENCES "meals"("meal_id")
 );
-INSERT INTO "meals" ("meal_id","category","meal") VALUES (1,'breakfast','crambled eggs'),
+DROP TABLE IF EXISTS "plan";
+CREATE TABLE IF NOT EXISTS "plan" (
+	"plan_id"	INTEGER,
+	"day"	TEXT NOT NULL,
+	"category"	TEXT NOT NULL,
+	"meal_id"	INTEGER NOT NULL,
+	PRIMARY KEY("plan_id" AUTOINCREMENT),
+	FOREIGN KEY("meal_id") REFERENCES "meals"("meal_id")
+);
+INSERT INTO "meals" ("meal_id","category","meal") VALUES (1,'breakfast','scrambled eggs'),
  (2,'breakfast','sandwich'),
  (3,'breakfast','oatmeal'),
  (4,'breakfast','english breakfast'),
@@ -66,6 +74,27 @@ INSERT INTO "ingredients" ("ingredient_id","meal_id","ingredient") VALUES (1,1,'
  (37,11,'tomato'),
  (38,11,'cheese'),
  (39,11,'salami'),
- (40,11,'tomato'),
- (41,11,'orzo');
+ (40,12,'tomato'),
+ (41,12,'orzo');
+INSERT INTO "plan" ("plan_id","day","category","meal_id") VALUES (1,'Monday','Breakfast',1),
+ (2,'Monday','Lunch',5),
+ (3,'Monday','Dinner',9),
+ (4,'Tuesday','Breakfast',2),
+ (5,'Tuesday','Lunch',6),
+ (6,'Tuesday','Dinner',10),
+ (7,'Wednesday','Breakfast',3),
+ (8,'Wednesday','Lunch',7),
+ (9,'Wednesday','Dinner',11),
+ (10,'Thursday','Breakfast',4),
+ (11,'Thursday','Lunch',8),
+ (12,'Thursday','Dinner',12),
+ (13,'Friday','Breakfast',1),
+ (14,'Friday','Lunch',5),
+ (15,'Friday','Dinner',9),
+ (16,'Saturday','Breakfast',2),
+ (17,'Saturday','Lunch',6),
+ (18,'Saturday','Dinner',10),
+ (19,'Sunday','Breakfast',3),
+ (20,'Sunday','Lunch',7),
+ (21,'Sunday','Dinner',11);
 COMMIT;

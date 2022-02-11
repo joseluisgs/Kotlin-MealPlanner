@@ -19,6 +19,10 @@ Proyecto de evaluación para el título de Kotlin Developer en Jetbrains Academy
       - [Description](#description-2)
     - [Parte 4](#parte-4)
       - [Description](#description-3)
+    - [Parte 5](#parte-5)
+      - [Description](#description-4)
+    - [Parte 6](#parte-6)
+      - [Description](#description-5)
   - [Autor](#autor)
     - [Contacto](#contacto)
   - [Licencia](#licencia)
@@ -94,7 +98,6 @@ There are no changes in the input/output structure in this stage.
 
 ### Parte 4
 #### Description
-Description
 Let's improve the navigation in the program and make it more user-friendly! In this stage, we will enhance the show command. The program will ask users to specify the meal category with the following message: Which category do you want to print (breakfast, lunch, dinner)? After this, the program will search through the database and print only the chosen category. If the requested category is empty, the program should show an appropriate message.
 
 Objectives
@@ -106,6 +109,64 @@ Ask users for the meal category;
 - If the input category doesn't exist, print Wrong meal category! Choose from: breakfast, lunch, dinner.;
 - If there're no meals in the category, print No meals found.
 
+### Parte 5
+#### Description
+A solid person plans for the week ahead! Let's help our users plan their meals for the entire week. In this stage, we will add a new command — plan. We also need to change the main menu accordingly. From now on, it should read as What would you like to do (add, show, plan, exit)?
+
+When users input plan, the program should print the first day of the week, Monday, and print the list of all breakfasts stored in the database in alphabetical order. After this, the program should ask users to pick a meal with the following message: Choose the breakfast for Monday from the list above:
+
+After users input a meal option, the program should verify it. If it's not stored in the database, print This meal doesn’t exist. Choose a meal from the list above. If the input is correct, move on to the next category — lunch and then to dinner. Once the meals for three categories are picked, print Yeah! We planned the meals for Monday. Repeat these steps for other weekdays. In the end, print the whole plan for the week.
+
+Save the plan to the database. For this purpose, create a new table named plan when the program starts. This table contains the meal option, meal category, and meal_id. The third column must match the meal_id columns of the other two tables. You are free to choose how to implement the fields in this table. If a new plan is created, delete the old plan.
+
+Objectives
+- Create a table in the database named plan;
+- Add the plan option to the menu;
+- When users choose the plan option:
+  - Print Monday;
+  - Print the meal names of the breakfast category in alphabetical order;
+  - Prompt Choose the breakfast for Monday from the list above:
+  - Once users input a meal, print the meal names of the lunch category in alphabetical order;
+  - Prompt Choose the lunch for Monday from the list above:
+  - Once users input a meal, print the meal names of the dinner category in alphabetical order;
+  - Prompt Choose the dinner for Monday from the list above:
+  - Once users input a meal, print Yeah! We planned the meals for Monday.
+  - If a meal option isn't in the provided list, print This meal doesn’t exist. Choose a meal from the list above.;
+  - Print a blank line and repeat for the rest of the week;
+  - Once the plan for the week is drawn, print it. The plan print format is as follows:
+```
+Monday
+Breakfast: [meal's name]
+Lunch: [meal's name]
+Dinner: [meal's name]
+
+Tuesday etc.
+```
+- Save the plan data in the plan table. Overwrite the old plan every time a new plan is created.
+
+### Parte 6
+#### Description
+Meal planning is only half of the job: we also need to be sure that we have all ingredients! In this stage, the program should generate a shopping list that contains the required ingredients for meals. If several meals require one ingredient, put it in the list only once in the following format: ingredient xN, where N is how many times we need this ingredient.
+
+Finally, let's add the option of saving the list as a file. Add the save command to the menu. Save the shopping list to a file and print an appropriate message. Don't forget to ask users for the file name.
+
+Objectives
+- Add the save option to the menu. This is how the first message should look in this stage: What would you like to do (add, show, plan, save, exit)?
+- When users choose plan:
+  - The save option is available only after users have made the plan for the week. If the plan isn't ready, print Unable to save. Plan your meals first. and go back to the menu;
+  - Ask users about a filename with the message: Input a filename:
+  - When the list has been saved, print Saved!
+
+- The format of the shopping list is as follows:
+```
+eggs
+tomato x3
+beef
+broccoli
+salmon
+chicken x2
+```
+- The ingredients can be stored in any order.
 
 ## Autor
 
