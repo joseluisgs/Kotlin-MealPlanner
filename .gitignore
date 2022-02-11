@@ -14,7 +14,4 @@ bin/
 *.iml
 *.iws
 *.ipruploads/
-uploads/
 
-
-meals.db
